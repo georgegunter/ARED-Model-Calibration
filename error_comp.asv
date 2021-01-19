@@ -1,34 +1,34 @@
-veh_V_full = readmatrix('vehV.csv');
-veh_X_full = readmatrix('vehX.csv');
-veh_S_full = readmatrix('vehS.csv');
-veh_T_full = readmatrix('vehT.csv');
-veh_VL_full = readmatrix('vehVL.csv');
-%% Select portion where humans are driving:
-
-lower_index = 1000;
-upper_index = 8000;
-
-veh_V = veh_V_full(:,lower_index:upper_index);
-veh_T = veh_T_full(:,lower_index:upper_index);
-veh_S = veh_S_full(:,lower_index:upper_index);
-veh_VL = veh_VL_full(:,lower_index:upper_index);
-veh_X = veh_X_full(:,lower_index:upper_index);
-
-%% Look at calibrating OV-FTL:
+%% Model and error func:
 
 V = @(p,s) p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)));
 accel_func = @(p,s,ds,v)  p(1)*(p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)))-v) + p(2)*((ds)./(s.^2));
-p0 = [.8,10,11.0,2.23,5]; %[alpha,beta,Vm,d0,d_star]
+
 error_string = 'spacing';
 obj_func = @(p) ARED_rmse(p,accel_func,veh_T,veh_S,veh_V,veh_VL,error_string);
 
+%% sample in a normalize ball around the optimal:
+p_opt = [0.6660,21.5975,8.9368,2.2146,2.8150];
 
-%% Run optimization:
-options = optimoptions(@fminunc,'Display','iter','Algorithm','quasi-newton');
-tic
-[p_opt,error_opt] = fminunc(obj_func,p0,options);
-toc
-% converges to p = [0.6660,21.5975,8.9368,2.2146,2.8150];
+s_eq = 153.9/21;
+
+num_samples = 500;
+param_std_var = .1;
+param_std_var = param_std_var.*p_opt;
+error_vals = zeros(num_samples,1);
+v_vals = zeros(num_samples,1);
+
+for n=1:num_samples
+    sample_param = p_opt + randn(1,length(p_opt)).*param_std_var;
+    error_val = obj_func(sample_param);
+    v_val = V(sample_param,s_eq);
+    
+    error_vals(n) = error_val;
+    v_vals(n) = v_val;
+end
+
+%% plot results:
+figure()
+plot(v_vals,error_vals,'.','MarkerSize',20)
 
 %% Look at values surrounding the local optima:
 

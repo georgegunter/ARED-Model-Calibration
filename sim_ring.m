@@ -32,7 +32,7 @@ s_eq = d_eq;
 
 fun = @(v) acceleration(s_eq,0,v);
 v_eq = fzero(fun,[0+1e-4,30]); %find equilibrium speed
-
+%% Initialize state variables:
 veh_x = linspace(d_eq,L,veh_n);        % initial vehicle positions
 veh_v = veh_x*0+v_eq;                  % initial vehicle velocities
 veh_X = veh_x'*ones(1,n_steps+1);      % array storing time-history of positions

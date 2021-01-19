@@ -15,7 +15,7 @@ veh_S = veh_S_full(:,lower_index:upper_index);
 veh_VL = veh_VL_full(:,lower_index:upper_index);
 
 %% Load library functions:
-% Original OV-FTL function:
+% Original Bando function:
 V = @(p,s) p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)));
 accel_func = @(p,s,ds,v)  p(1)*(p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)))-v) + p(2)*((ds)./(s.^2));
 % make libraries for regression:
@@ -25,8 +25,8 @@ accel_func = @(p,s,ds,v)  p(1)*(p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5
 s0_sindy = 2.21;
 s_star_sindy = 2.815;
 
-V_sindy =  @(s) (tanh(s./s0_sindy-s_star_sindy)+tanh(s_star_sindy))/(1+tanh(s_star_sindy));  
-FTL_sindy = @(s,ds_dt) (ds_dt./(s.^2));
+V_sindy =  @(s,v) (tanh(s./2.21-2.815)+tanh(2.815))/(1+tanh(2.815));  
+FTL_sindy = @(s,dsdt) (s./(dsdt.^2));
 %% make accelerations:
 DVDT = zeros(size(veh_V));
 dt = 1/30;
@@ -43,7 +43,7 @@ v_vec = reshape(veh_V,numel(veh_V),1);
 vl_vec = reshape(veh_VL,numel(veh_VL),1);
 dsdt_vec = vl_vec - v_vec;
 
-A = [V_sindy(s_vec),v_vec,FTL_sindy(s_vec,dsdt_vec)];
+A = [V_sindy(s_vec,v_vec),v_vec,FTL_sindy(s_vec,dsdt_vec)];
 
 %% Perform regression:
 tic
@@ -53,26 +53,12 @@ disp('Regression finished')
 
 %% extract parameters and 
 
-alpha_sindy = -x(2);
-beta_sindy = x(3);
-vm_sindy = x(1)/alpha_sindy;
+alpha = -x(2);
+beta = x(3);
+vm = x(1)/alpha;
 
 %% Calculate batch error:
-p_sindy = [alpha_sindy,beta_sindy,vm_sindy,s0_sindy,s_star_sindy];
 
-batch_error_sindy = ARED_rmse(p_sindy,accel_func,veh_T,veh_S,veh_V,veh_VL,'spacing');
-
-%% Perform a sim:
-
-[t,veh_X_sim,veh_V_sim,veh_S_sim] = sim_ring(p_sindy,accel_func,21,153.91,400,1/30,true);
-
-figure()
-subplot(2,1,1)
-plot(t,veh_V_sim')
-ylabel('Speed [m/s]')
-subplot(2,1,2)
-plot(t,veh_S_sim')
-ylabel('Spacing [m]')
 
 
 
