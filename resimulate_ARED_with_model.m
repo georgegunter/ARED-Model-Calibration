@@ -1,23 +1,28 @@
+load_data = false;
+if(load_data)    
 %% Load data:
-veh_V_full = readmatrix('vehV.csv');
-veh_X_full = readmatrix('vehX.csv');
-veh_S_full = readmatrix('vehS.csv');
-veh_T_full = readmatrix('vehT.csv');
-veh_VL_full = readmatrix('vehVL.csv');
-%% Select portion where humans are driving:
+    veh_V_full = readmatrix('vehV.csv');
+    veh_X_full = readmatrix('vehX.csv');
+    veh_S_full = readmatrix('vehS.csv');
+    veh_T_full = readmatrix('vehT.csv');
+    veh_VL_full = readmatrix('vehVL.csv');
+    %% Select portion where humans are driving:
 
-lower_index = 1000;
-upper_index = 8000;
+    lower_index = 1000;
+    upper_index = 8000;
 
-veh_V = veh_V_full(:,lower_index:upper_index);
-veh_T = veh_T_full(:,lower_index:upper_index);
-veh_S = veh_S_full(:,lower_index:upper_index);
-veh_VL = veh_VL_full(:,lower_index:upper_index);
-veh_X = veh_X_full(:,lower_index:upper_index);
+    veh_V = veh_V_full(:,lower_index:upper_index);
+    veh_T = veh_T_full(:,lower_index:upper_index);
+    veh_S = veh_S_full(:,lower_index:upper_index);
+    veh_VL = veh_VL_full(:,lower_index:upper_index);
+    veh_X = veh_X_full(:,lower_index:upper_index);
+end
 %% simulation parameters:
 
 accel_func = @(p,s,ds,v)  p(1)*(p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)))-v) + p(2)*((ds)./(s.^2));
-p = [0.6660,21.5975,8.9368,2.2146,2.8150];
+% p = [0.6660,21.5975,8.9368,2.2146,2.8150]; %Batch calibration
+p = [0.0947,8.1310,10.1689,2.2100,2.8150]; %SINDY calibration
+
 veh_n = 21;
 ring_length = 153.9;
 sim_length = veh_T(1,end) - veh_T(1,1);
