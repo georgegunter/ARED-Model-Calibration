@@ -1,6 +1,7 @@
-function [v_sim,s_sim,a_sim] = run_sim(p,accel_func,t_real,s_real,v_real,v_l_real)
+function [v_sim,s_sim,p_sim] = run_sim(p,accel_func,t_real,s_real,v_real,v_l_real)
     v_sim = zeros(size(v_real));
     s_sim = zeros(size(s_real));
+    p_sim = zeros(size(s_real));
     
     v_sim(1) = v_real(1);
     s_sim(1) = s_real(1);
@@ -18,6 +19,7 @@ function [v_sim,s_sim,a_sim] = run_sim(p,accel_func,t_real,s_real,v_real,v_l_rea
         
         v_sim(i) = v + dt*dv_dt;
         s_sim(i) = s + dt*ds_dt;
+        p_sim(i) = p_sim(i-1) + v*dt;
         
     end
 end

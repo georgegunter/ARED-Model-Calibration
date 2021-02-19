@@ -20,7 +20,7 @@ V = @(p,s) p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)));
 accel_func = @(p,s,ds,v)  p(1)*(p(3)*(tanh(s./p(4)-p(5))+tanh(p(5)))/(1+tanh(p(5)))-v) + p(2)*((ds)./(s.^2));
 p0 = [.8,10,11.0,2.23,5]; %[alpha,beta,Vm,d0,d_star]
 error_string = 'spacing';
-obj_func = @(p) ARED_rmse(p,accel_func,veh_T,veh_S,veh_V,veh_VL,error_string);
+obj_func = @(p) ARED_rmse(p,accel_func,veh_T,veh_X,veh_S,veh_V,veh_VL,error_string);
 
 
 %% Run optimization:
